@@ -147,11 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="source\dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="re4.CT" />
+    <None Include="research\re4.CT" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
