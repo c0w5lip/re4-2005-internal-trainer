@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="research\re4.CT" />
+    <None Include="research\re4-2005.CT" />
     <None Include=".gitignore" />
   </ItemGroup>
 </Project>
