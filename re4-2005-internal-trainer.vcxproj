@@ -187,6 +187,9 @@
     <ClInclude Include="source\memory.h" />
     <ClInclude Include="source\utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="source\detours\x86\detours.lib" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
