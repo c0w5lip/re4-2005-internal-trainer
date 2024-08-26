@@ -8,6 +8,7 @@
 #include <detours.h>
 
 #include "gui.h"
+#include "memory.h"
 
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
@@ -19,6 +20,10 @@ HRESULT _stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice);
 
 
 namespace variables {
+
+    int money_value = 0;
+
+
     static LPDIRECT3DDEVICE9 PD3D_DEVICE = nullptr;
     static IDirect3D9* PD3D = nullptr;
     static WNDPROC WNDPROC_ORIGNAL = nullptr;
@@ -58,23 +63,20 @@ HWND GetProcessWindow() {
 }
 
 
-
-
-bool GetD3D9Device(void** pTable, size_t size)
-{
-    if (!pTable)
+bool GetD3D9Device(void** pTable, size_t size) {
+    if (!pTable) {
         return false;
+    }
 
-    // Create a D3D Variable and get the sdk version
     variables::PD3D = Direct3DCreate9(D3D_SDK_VERSION);
 
-    // Make sure that the pointer is valid
-    if (!variables::PD3D)
+    if (!variables::PD3D) {
         return false;
+    }
 
     D3DPRESENT_PARAMETERS d3dpp = {};
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    // The game window we want to render on
+
     d3dpp.hDeviceWindow = GetProcessWindow();
     d3dpp.Windowed = true;
 
@@ -85,10 +87,8 @@ bool GetD3D9Device(void** pTable, size_t size)
         return false;
     }
 
-    // We are copying the pTable that we get from the device and its gonna be the size of the pTable
     memcpy(pTable, *reinterpret_cast<void***>(variables::PD3D_DEVICE), size);
 
-    // Realase everything at the end
     variables::PD3D_DEVICE->Release();
     variables::PD3D->Release();
 
@@ -96,13 +96,10 @@ bool GetD3D9Device(void** pTable, size_t size)
 }
 
 
-HRESULT __stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice)
-{
+HRESULT __stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice) {
     if (!variables::isInit) {
-        // Call the original game message handling fnc
         variables::WNDPROC_ORIGNAL = (WNDPROC)SetWindowLongPtr(variables::window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 
-        // Draw the ImGui Menu
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
@@ -111,26 +108,46 @@ HRESULT __stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice)
         ImGui_ImplWin32_Init(variables::window);
         ImGui_ImplDX9_Init(pDevice);
 
-        // Init to true to prevent spamming the message box
         variables::isInit = true;
     }
 
     if (GetAsyncKeyState('L') & 1) { // ;)
         gui::isMenuToggled = !gui::isMenuToggled;
-        Sleep(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     ImGui_ImplDX9_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    if (gui::isMenuToggled) {
-        ImGui::Begin("Faces Menu", &gui::isMenuToggled);
-        static bool isChamsToggled = false;
-        ImGui::Checkbox("Chams", &isChamsToggled);
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+    io.MouseDrawCursor = true;
+
+    POINT cursorPos;
+    if (GetCursorPos(&cursorPos))
+    {
+        ScreenToClient(variables::window, &cursorPos);
+        io.MousePos = ImVec2((float)cursorPos.x, (float)cursorPos.y);
     }
 
-    ImGui::EndFrame();
+    io.MouseDown[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+    
+    
+
+    if (gui::isMenuToggled) {
+        ImGui::Begin("Resident Evil 4 (2005) Internal trainer by c0w5lip", &gui::isMenuToggled);
+
+        
+        ImGui::Text("Enter money value: ");
+        ImGui::InputInt("some value", &variables::money_value, 1, 2, 0);
+        if (ImGui::Button("Apply")) {
+            SetMoney(variables::money_value);
+        }
+    }
+    
     ImGui::Render();
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 
@@ -170,7 +187,7 @@ void MainThread(const HMODULE instance) noexcept {
         }
     }
 
-	FreeLibraryAndExitThread(instance, 0);
+	FreeLibraryAndExitThread(instance, 0); // TODO: prevent the game from crashing when unloading the DLL lol
 }
 
 int __stdcall DllMain(const HMODULE instance, const std::uintptr_t reason, const void* reserved) {
