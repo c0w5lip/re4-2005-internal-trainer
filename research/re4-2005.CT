@@ -13,12 +13,22 @@
     </CheatEntry>
     <CheatEntry>
       <ID>2</ID>
-      <Description>"pesetas"</Description>
+      <Description>"money"</Description>
       <ShowAsSigned>0</ShowAsSigned>
       <VariableType>4 Bytes</VariableType>
       <Address>bio4.exe+0x805F3C</Address>
       <Offsets>
         <Offset>4FA8</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>3</ID>
+      <Description>"health"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>2 Bytes</VariableType>
+      <Address>bio4.exe+0x805F3C</Address>
+      <Offsets>
+        <Offset>4FB4</Offset>
       </Offsets>
     </CheatEntry>
   </CheatEntries>

@@ -22,6 +22,9 @@ HRESULT _stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice);
 namespace variables {
 
     int money_value = 0;
+    int health_value = 0;
+
+    bool isGodModeEnabled = true;
 
 
     static LPDIRECT3DDEVICE9 PD3D_DEVICE = nullptr;
@@ -123,8 +126,8 @@ HRESULT __stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
     ImGuiIO& io = ImGui::GetIO();
 
-    io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
-    io.MouseDrawCursor = true;
+    // io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+    io.MouseDrawCursor = false;
 
     POINT cursorPos;
     if (GetCursorPos(&cursorPos))
@@ -138,14 +141,27 @@ HRESULT __stdcall hookEndScene(LPDIRECT3DDEVICE9 pDevice) {
     
 
     if (gui::isMenuToggled) {
+        io.MouseDrawCursor = !io.MouseDrawCursor;
         ImGui::Begin("Resident Evil 4 (2005) Internal trainer by c0w5lip", &gui::isMenuToggled);
 
+        ImGui::InputInt("money", &variables::money_value, 1, 2, 0);
+        ImGui::InputInt("health", &variables::health_value, 1, 2, 0);
         
-        ImGui::Text("Enter money value: ");
-        ImGui::InputInt("some value", &variables::money_value, 1, 2, 0);
-        if (ImGui::Button("Apply")) {
-            SetMoney(variables::money_value);
+        if (ImGui::Button("apply (money)")) {
+            SetValue(offsets::money, variables::money_value);
         }
+
+        if (ImGui::Button("apply (health)")) {
+            SetValue(offsets::health, variables::health_value);
+        }
+        
+
+        ImGui::Checkbox("God mode", &variables::isGodModeEnabled);
+    }
+
+
+    if (variables::isGodModeEnabled) {
+        SetValue(offsets::health, 1337);
     }
     
     ImGui::Render();
